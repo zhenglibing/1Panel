@@ -455,6 +455,9 @@ func (a AppService) installWithHooks(req request.AppInstallCreate, executeScript
 			return
 		}
 	}
+	if err = mapImagesForLoong64(composeMap); err != nil {
+		return
+	}
 
 	value, ok := composeMap["services"]
 	if !ok || value == nil {
