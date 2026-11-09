@@ -1290,7 +1290,13 @@ func getApps(oldApps []model.App, items []dto.AppDefine, systemVersion string, t
 			continue
 		}
 		if config.Deprecated > 0 && common.CompareAppVersion(systemVersion, strconv.FormatFloat(config.Deprecated, 'f', -1, 64)) {
-			continue
+			// loong64: keep php8 syncable. The store marks it deprecated since
+			// v2, but the runtime module still offers PHP runtimes from this
+			// store entry; image supply is handled by locally prebuilt tags.
+			if config.Key != "php8" {
+				continue
+			}
+			global.LOG.Infof("[AppStore] loong64 php8 kept despite deprecated=%v (sysver=%s)", config.Deprecated, systemVersion)
 		}
 
 		key := config.Key
@@ -1326,6 +1332,8 @@ func getApps(oldApps []model.App, items []dto.AppDefine, systemVersion string, t
 		}
 		apps[key] = app
 	}
+	_, php8Kept := apps["php8"]
+	global.LOG.Infof("[AppStore] loong64 getApps map size=%d php8Kept=%v", len(apps), php8Kept)
 	return apps
 }
 
