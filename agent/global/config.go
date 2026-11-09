@@ -14,7 +14,10 @@ type Base struct {
 	Version      string `mapstructure:"version"`
 	EncryptKey   string `mapstructure:"encrypt_key"`
 	Mode         string `mapstructure:"mode"` // xpack [ Enable / Disable ]
-	IsDemo       bool   `mapstructure:"is_demo"`
+	// loong64: custom app-store source base URL (e.g. a self-hosted mirror);
+	// empty keeps the built-in default per edition.
+	AppRepoURL string `mapstructure:"app_repo_url"`
+	IsDemo     bool   `mapstructure:"is_demo"`
 	InstallDir   string `mapstructure:"install_dir"`
 	IsOffline    bool   `mapstructure:"is_offline"`
 }

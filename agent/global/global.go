@@ -2,6 +2,7 @@ package global
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	badger_db "github.com/1Panel-dev/1Panel/agent/init/cache/db"
@@ -90,6 +91,10 @@ func ResourceURL() string {
 	return "https://resource.1panel.pro/v2/resource"
 }
 func AppRepoURL() string {
+	// loong64: self-hosted app-store source (base.app_repo_url in app.yml)
+	if CONF.Base.AppRepoURL != "" {
+		return strings.TrimRight(CONF.Base.AppRepoURL, "/")
+	}
 	if CONF.Base.IsEnterprise {
 		return "https://apps-assets.fit2cloud.com"
 	}
