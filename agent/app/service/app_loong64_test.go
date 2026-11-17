@@ -186,6 +186,61 @@ func TestMapLoong64Image(t *testing.T) {
 		{"linuxserver/qbittorrent:5.3.0", "127.0.0.1:5000/loong/qbittorrent:5.3.0", true},
 		{"valkey/valkey:9.0.7", "127.0.0.1:5000/loong/valkey:9.0.7", true},
 		{"zabbix/zabbix-agent:alpine-7.4.5", "127.0.0.1:5000/loong/zabbix-agent:alpine-7.4.5", true},
+		// wave39 (2026-11-15)
+		{"registry.cn-qingdao.aliyuncs.com/dataease/dataease:v3.1.0", "127.0.0.1:5000/loong/dataease:v3.1.0", true},
+		{"1dev/server:17.2.0", "127.0.0.1:5000/loong/onedev:17.2.0", true},
+		{"code.forgejo.org/forgejo/runner:13.2.1", "127.0.0.1:5000/loong/forgejo-runner:13.2.1", true},
+		{"docker:29.9.3", "lcr.loongnix.cn/library/docker:v28.3.0-dind", true},
+		// wave42 (2026-11-15)
+		{"bitnamilegacy/redis:8.0", "lcr.loongnix.cn/library/redis:7.4.1", true},
+		{"bitnamilegacy/redis:6.2", "lcr.loongnix.cn/library/redis:6.2.13", true},
+		{"bitnamilegacy/postgresql:17", "lcr.loongnix.cn/library/postgres:17-sid", true},
+		{"bitnamilegacy/postgresql:14", "lcr.loongnix.cn/library/postgres:13.19-alpine3.21", true},
+		{"codeberg.org/forgejo/forgejo:16.0.7", "127.0.0.1:5000/loong/forgejo:16.0.7", true},
+		{"codeberg.org/forgejo/forgejo:16.0.7-rootless", "127.0.0.1:5000/loong/forgejo:16.0.7-rootless", true},
+		// wave43 (2026-11-15)
+		{"jgraph/drawio:32.6.10", "127.0.0.1:5000/loong/drawio:32.6.10", true},
+		{"diygod/rsshub:chromium-bundled-2026-04-19", "127.0.0.1:5000/loong/rsshub:chromium-bundled-2026-04-19", true},
+		// wave44 (2026-11-15)
+		{"ghost:6.77.0", "127.0.0.1:5000/loong/ghost:6.77.0", true},
+		// wave45 (2026-11-16)
+		{"n8nio/n8n:2.48.2", "127.0.0.1:5000/loong/n8n:2.48.2", true},
+		{"nocodb/nocodb:0.301.5", "127.0.0.1:5000/loong/nocodb:0.301.5", true},
+		{"greper/certd:1.47.1", "127.0.0.1:5000/loong/certd:1.47.1", true},
+		// wave46 (2026-11-16)
+		{"ghcr.io/ourongxing/newsnow:v0.0.41", "127.0.0.1:5000/loong/newsnow:v0.0.41", true},
+		{"koishijs/koishi:v1.16.0", "127.0.0.1:5000/loong/koishi:v1.16.0", true},
+		// wave47 (2026-11-16)
+		{"henryclw/jsonhero-web:latest", "127.0.0.1:5000/loong/jsonhero:latest", true},
+		{"kingwrcy/mblog:1.1.0", "127.0.0.1:5000/loong/mblog:1.1.0", true},
+		// wave48 (2026-11-16)
+		{"certimate/certimate:v0.4.36", "127.0.0.1:5000/loong/certimate:v0.4.36", true},
+		// wave49 (2026-11-16)
+		{"chigusa/bililive-go:v0.8.3", "127.0.0.1:5000/loong/bililive-go:v0.8.3", true},
+		{"b3log/siyuan:v3.8.10", "127.0.0.1:5000/loong/siyuan:v3.8.10", true},
+		// wave50 (2026-11-16)
+		{"docker.cnb.cool/mliev/dwz/dwz-server:v2.24.1", "127.0.0.1:5000/loong/mliev-dwz:v2.24.1", true},
+		{"redpandadata/console:v3.14.0", "127.0.0.1:5000/loong/redpanda-console:v3.14.0", true},
+		// wave51 (2026-11-16)
+		{"svhd/logto:1.46.0", "127.0.0.1:5000/loong/logto:1.46.0", true},
+		{"ghcr.io/umami-software/umami:3.5.0", "127.0.0.1:5000/loong/umami:3.5.0", true},
+		// wave52 (2026-11-16)
+		{"keking/kkfileview:4.1.0", "127.0.0.1:5000/loong/kkfileview:4.1.0", true},
+		{"sonatype/nexus3:3.98.1", "127.0.0.1:5000/loong/nexus:3.98.1", true},
+		// wave53 (2026-11-16)
+		{"sonarqube:26.11.0.134175-community", "127.0.0.1:5000/loong/sonarqube:26.11.0.134175-community", true},
+		// wave54 (2026-11-17) gap triage: mysql-cluster app unmapped
+		{"bitnamilegacy/mysql:8.4", "lcr.loongnix.cn/library/mysql:8.4.3", true},
+		{"bitnamilegacy/mysql:8.4.29", "lcr.loongnix.cn/library/mysql:8.4.3", true},
+		// wave55 (2026-11-17)
+		{"1panel/kubepi:v2.0.3", "127.0.0.1:5000/loong/kubepi:v2.0.3", true},
+		{"mattermost/mattermost-team-edition:12.1.0", "127.0.0.1:5000/loong/mattermost:12.1.0", true},
+		// wave56 (2026-11-17) first Rust batch
+		{"getmeili/meilisearch:v1.56.2", "127.0.0.1:5000/loong/meilisearch:v1.56.2", true},
+		// wave57 (2026-11-18) Rust batch #2
+		{"rustfs/rustfs:1.0.5", "127.0.0.1:5000/loong/rustfs:1.0.5", true},
+		{"stalwartlabs/stalwart:v1.1.0-alpine", "127.0.0.1:5000/loong/stalwart-mail:v1.1.0-alpine", true},
+		{"timberio/vector:0.61.0-debian", "127.0.0.1:5000/loong/vector:0.61.0-debian", true},
 		// no mapping
 		{"nginx:stable", "", false},
 		{"lcr.loongnix.cn/library/redis:7.4.1", "", false},
@@ -245,6 +300,31 @@ func TestIsBlockedLoong64Image(t *testing.T) {
 		"zhaojun1998/zfile:5.1.0",
 		// wave 14 audit (2026-11-08)
 		"rustdesk/rustdesk-server-s6:1.1.16",
+		// wave54 (2026-11-17) gap triage
+		"rockchin/langbot:v4.11.7",
+		"langflowai/langflow:1.13.2",
+		"1panel/maxkb:v2.10.8-lts",
+		"1panel/openclaw:2026.11.3",
+		"clickhouse/clickhouse-server:26.10.3-alpine",
+		"oceanbase/oceanbase-ce:4.4.2-lts",
+		"starrocks/allin1-ubuntu:4.1.7",
+		"manticoresearch/manticore:29.9.0",
+		"typesense/typesense:30.2",
+		"zabbix/zabbix-server-mysql:alpine-7.4.5",
+		"zabbix/zabbix-proxy-mysql:alpine-7.4.5",
+		"homeassistant/home-assistant:2026.11.1",
+		"jupyter/scipy-notebook:latest",
+		"archivebox/archivebox:0.9.77",
+		"dgtlmoon/changedetection.io:0.70.3",
+		"ghcr.io/browserless/chrome:v2.63.0",
+		"bitnamilegacy/discourse:3.5.0",
+		"ghcr.io/huginn/huginn:latest",
+		"jumpserver/jms_all:v5.1.1",
+		"metersphere/metersphere-ce-allinone:v3.6.10-lts",
+		"xiaozhu674/gameservermanager:3.14.3",
+		"onlyoffice/documentserver:10.0.0.1",
+		"litespeedtech/openlitespeed:1.8.4-lsphp81",
+		"ghcr.io/yetone/magpie:0.1.4012",
 	}
 	for _, img := range blocked {
 		if !isBlockedLoong64Image(img) {

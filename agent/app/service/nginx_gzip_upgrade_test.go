@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -155,6 +156,9 @@ func TestGzipTemplateMatchesCorrectedDefaults(t *testing.T) {
 	if len(template) == 0 {
 		t.Fatal("gzip.conf template is missing from the embedded files")
 	}
+	// Windows working trees may carry CRLF via autocrlf; normalize so the
+	// directive regex's $ anchor matches before comparing against the maps.
+	template = bytes.ReplaceAll(template, []byte("\r\n"), []byte("\n"))
 	expected := make(map[string]string, len(stockNginxGzipDirectives))
 	for name, value := range stockNginxGzipDirectives {
 		expected[name] = value

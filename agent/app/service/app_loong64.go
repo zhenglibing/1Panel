@@ -145,11 +145,89 @@ var loong64RepoRules = map[string]loong64Rule{
 	"linuxserver/qbittorrent":        {Target: loongLocalRegistry + "qbittorrent"},          // keep tag (mega216)
 	"valkey/valkey":                  {Target: loongLocalRegistry + "valkey"},               // keep tag (mega216)
 	"zabbix/zabbix-agent":            {Target: loongLocalRegistry + "zabbix-agent"},         // keep tag (mega216)
+	// --- wave29 (2026-11-11) ---
+	"apache/answer":           {Target: loongLocalRegistry + "answer"},      // keep tag (wave29)
+	"bytebase/bytebase":       {Target: loongLocalRegistry + "bytebase"},    // keep tag (wave29)
+	"bytebase/dbhub":          {Target: loongLocalRegistry + "dbhub"},       // keep tag (wave29)
+	"emlog/emlog":             {Target: loongLocalRegistry + "emlog"},       // keep tag (wave29)
+	"hub.zentao.net/app/zentao": {Target: loongLocalRegistry + "zentao"},    // keep tag (wave29)
+	"fireflyiii/core":         {Target: loongLocalRegistry + "firefly-iii"}, // keep tag (wave29)
+	// --- wave30 (2026-11-11) ---
+	"frooodle/s-pdf":        {Target: loongLocalRegistry + "stirling-pdf"}, // keep tag (wave30)
+	"linuxserver/heimdall":  {Target: loongLocalRegistry + "heimdall"},     // keep tag (wave30)
+	"lissy93/dashy":         {Target: loongLocalRegistry + "dashy"},        // keep tag (wave30)
+	// --- wave31 (2026-11-11) ---
+	"yidadaa/chatgpt-next-web": {Target: loongLocalRegistry + "chatgpt-next-web"}, // keep tag (wave31)
+	"ghcr.io/gethomepage/homepage": {Target: loongLocalRegistry + "homepage"},    // keep tag (wave31)
+	// --- wave32 (2026-11-12) ---
+	"lissy93/web-check":      {Target: loongLocalRegistry + "web-check"},   // keep tag (wave32)
+	"outlinewiki/outline":    {Target: loongLocalRegistry + "outline"},     // keep tag (wave32)
+	// --- wave34 (2026-11-14) ---
+	"binwiederhier/ntfy":     {Target: loongLocalRegistry + "ntfy"},        // keep tag (wave34)
+	"ghcr.io/plankanban/planka": {Target: loongLocalRegistry + "planka"},   // keep tag (wave34)
+	// --- wave36 (2026-11-14) ---
+	"docmost/docmost":        {Target: loongLocalRegistry + "docmost"},     // keep tag (wave36)
+	"triliumnext/trilium":    {Target: loongLocalRegistry + "trilium"},     // keep tag (wave36)
+	// --- wave37 (2026-11-14) ---
+	"ghcr.io/nodebb/nodebb":  {Target: loongLocalRegistry + "nodebb"},      // keep tag (wave37)
+	// --- wave38 (2026-11-14) ---
+	"moonrailgun/tailchat":   {Target: loongLocalRegistry + "tailchat"},    // keep tag (wave38)
+	// --- wave39 (2026-11-15) ---
+	"registry.cn-qingdao.aliyuncs.com/dataease/dataease": {Target: loongLocalRegistry + "dataease"}, // keep tag; amd64 fatjar repack onto temurin alpine-jre
+	"1dev/server":            {Target: loongLocalRegistry + "onedev"},         // keep tag; amd64 product repack, native wrapper bypassed (pure-java io.onedev.wrapper)
+	"code.forgejo.org/forgejo/runner": {Target: loongLocalRegistry + "forgejo-runner"}, // keep tag; goproxy cross build
+	"docker":                 {Target: loongLCRRegistry + "library/docker", Fallback: "v28.3.0-dind"}, // forgejo-runner dind sidecar
+	// --- wave42 (2026-11-15) ---
+	"codeberg.org/forgejo/forgejo": {Target: loongLocalRegistry + "forgejo"}, // keep tag; PC cross build (webpack frontend + go loong64), gitea-compatible alpine layout
+	// --- wave43 (2026-11-15) MED batch ---
+	"jgraph/drawio":  {Target: loongLocalRegistry + "drawio"}, // keep tag; amd64 webapp extraction onto lcr tomcat 9-jdk11 (static war, arch-neutral)
+	"diygod/rsshub":  {Target: loongLocalRegistry + "rsshub"}, // keep tag; device build (pure-JS node app, pnpm + npmmirror, no native deps)
+	// --- wave44 (2026-11-15) ---
+	"ghost": {Target: loongLocalRegistry + "ghost"}, // keep tag; device build: npm install + libvips 8.18.7 source build (sharp 0.35.5), node-gyp better-sqlite3, wasm fallback bindings
+	// --- wave45 (2026-11-16) node24 family ---
+	"n8nio/n8n":    {Target: loongLocalRegistry + "n8n"},    // keep tag; device build: npm i -g n8n on self-built node 24.22.3, node-gyp sqlite3 + isolated-vm
+	"nocodb/nocodb": {Target: loongLocalRegistry + "nocodb"}, // keep tag; amd64 tree swap-in: sharp 0.33.4 src build + sqlite3/lz4 npm-pkg rebuild (lz4 skipped: nan vs node24 V8)
+	"greper/certd":  {Target: loongLocalRegistry + "certd"},  // keep tag; amd64 tree swap-in: better-sqlite3 11.10.0 node-gyp, pnpm symlinks rebuilt
+	// --- wave46 (2026-11-16) ---
+	"ghcr.io/ourongxing/newsnow": {Target: loongLocalRegistry + "newsnow"}, // keep tag; ghcr Nitro standalone tree swap-in on slim certd base, better-sqlite3 12.6.2 compiled in ghost container
+	"koishijs/koishi":            {Target: loongLocalRegistry + "koishi"},  // keep tag; alpine boilerplate zip -> tar convert (symlinks+modes), cp-in entrypoint, npm start on slim certd base
+	// --- wave47 (2026-11-16) ---
+	"henryclw/jsonhero-web": {Target: loongLocalRegistry + "jsonhero"}, // keep tag; remix prod rebuild on node24 (esbuild 0.14.51 native), ssr-shim --require (navigator/document/sessionStorage), setup node
+	"kingwrcy/mblog":        {Target: loongLocalRegistry + "mblog"},    // keep tag; temurin17-trixie base + jar swap-in + host-gcc xerial sqlite native libsqlitejdbc.so (first Java app)
+	// --- wave48 (2026-11-16) ---
+	"certimate/certimate": {Target: loongLocalRegistry + "certimate"}, // keep tag; alpine3.22 base + go1.25.14 cross-compiled static binary (ui built on PC node24, embed)
+	// --- wave49 (2026-11-16) ---
+	"chigusa/bililive-go": {Target: loongLocalRegistry + "bililive-go"}, // keep tag; debian sid base + apt ffmpeg (deb.debian.org main ships loong64) + go1.25.14 cross-compiled -tags release binary (CRA frontend built on PC node24, go:embed)
+	"b3log/siyuan":        {Target: loongLocalRegistry + "siyuan"},      // keep tag; alpine3.22 base + kernel built natively on device (CGO sqlcipher+fts5, GOTOOLCHAIN=go1.26.10) + frontend artifacts from PC pnpm12 webpack; OCR stripped (no loong64 onnxruntime, runtime dlopen -> ErrUnavailable fallback)
+	// --- wave50 (2026-11-16) ---
+	"docker.cnb.cool/mliev/dwz/dwz-server": {Target: loongLocalRegistry + "mliev-dwz"}, // keep tag; go1.26.8 CGO_ENABLED=0 cross-compile (Gin+GORM, embed static/templates/migrations) + vben admin dist built on PC node24 pnpm10.34.5; alpine3.22 runtime, CMD ["./dwz","start"]
+	"redpandadata/console":                {Target: loongLocalRegistry + "redpanda-console"}, // keep tag; go1.26.10 CGO_ENABLED=0 cross-compile backend/cmd/api + rsbuild frontend built on PC bun1.4.3 (frontend/build -> backend/pkg/embed/frontend); alpine3.22 runtime
+	// --- wave51 (2026-11-16) ---
+	"svhd/logto": {Target: loongLocalRegistry + "logto"}, // keep tag; PC node24 pnpm10 monorepo build + device prod install (node26-debian, native rebuild via apt toolchain); ENTRYPOINT ["npm","run"] CMD ["start"]
+	"ghcr.io/umami-software/umami": {Target: loongLocalRegistry + "umami"}, // keep tag (latest 3.4.1; 2.20.2 ${PANEL_DB_TYPE} ref unmappable); prisma7 engineType=client pure-JS adapter-pg (no native engine); SKIP_DB_MIGRATION + SQL-file entrypoint; PC pnpm12.3.4 next build standalone on node22-debian runtime
+	// --- wave52 (2026-11-16) ---
+	"keking/kkfileview":  {Target: loongLocalRegistry + "kkfileview"}, // keep tag; maven-built server (device temurin8+jdk aliyun mirror) on debian trixie base with apt libreoffice/cjk fonts/ffmpeg (deb.debian.org loong64); java -jar entrypoint
+	"sonatype/nexus3":   {Target: loongLocalRegistry + "nexus"}, // keep tag; arm64 image layer extraction (pure-java Karaf app) on temurin21-trixie; sed vmoptions to /nexus-data, Xmx1024m
+	// --- wave53 (2026-11-16) ---
+	"sonarqube": {Target: loongLocalRegistry + "sonarqube"}, // keep tag; arm64 image layer extraction (bundled ES9 pure-java, JNA/libvec native load fails -> WARN fallback, ES binds 127.0.0.1 loopback local mode) on temurin25-alpine-jre; ENTRYPOINT java -jar lib/sonarqube.jar (official entrypoint.sh needs bash)
+	// --- wave54 (2026-11-17) ---
+	"bitnamilegacy/mysql": {Target: loongLCRRegistry + "library/mysql", Fallback: "8.4.3", ByMajor: map[string]string{"5": "5.7.29-an23", "8": "8.4.3"}}, // wave54 gap triage: mysql-cluster app was unmapped (no_rule); same lcr mysql as plain mysql rule
+	// --- wave55 (2026-11-17) ---
+	"1panel/kubepi": {Target: loongLocalRegistry + "kubepi"}, // keep tag; PC node24 builds 3 vue/angular frontends embed into kubepi-server (go1.26 cross) + gotty cross (pty upgraded to v1.1.24 for loong64); alpine3.22 base with kubectl(loongnix deb)/helm/k9s/fzf cross-built
+	"mattermost/mattermost-team-edition": {Target: loongLocalRegistry + "mattermost"}, // keep tag; official amd64 layer extraction (webapp client/plugins/i18n) + server binary go1.26.10 cross via go.work(server/public member); alpine3.22 static
+	// --- wave56 (2026-11-17) ---
+	"getmeili/meilisearch": {Target: loongLocalRegistry + "meilisearch"}, // keep tag; first Rust batch: on-device native build (lcr rust:1.100 image, rust-toolchain.toml 1.98.1 auto-synced by rustup loong64 channel, rsproxy fetched 800 crates); debian:sid+tini base (compose command "sh -c" overrides CMD so ENTRYPOINT must be ["/bin/tini","--"] like official)
+	// --- wave57 (2026-11-17) Rust batch #2 ---
+	"rustfs/rustfs": {Target: loongLocalRegistry + "rustfs"}, // keep tag; on-device native build (lcr rust:1.100); 2 git deps (rustfs/uring, s3s-project/s3s) vendored at locked revs as path deps - cargo libgit2 hangs on github from CN; debian:sid base (glibc binary, NOT alpine), official-style entrypoint.sh+bootstrap, RUSTFS_VOLUMES=/data, USER root (bind-mount ./data is host-root-owned; official USER rustfs uid10001 cannot write bind mounts)
+	"stalwartlabs/stalwart": {Target: loongLocalRegistry + "stalwart-mail"}, // keep tag; on-device native build (lcr rust:1.100) with --no-default-features --features sqlite,postgres,mysql,s3,redis,enterprise (rocks dropped: vendored rust-rocksdb lacks the C++ git submodule a codeload tarball cannot carry); [patch.crates-io] git deps (hickory-dns) vendored as path deps; aws-lc-sys hard dep (main.rs installs provider) built via cmake/clang bindgen; CONFIG_PATH=/opt/stalwart/config.json so 1panel ./data:/opt/stalwart mount holds config+store (upstream image uses /etc/stalwart which the 1panel compose does not persist)
+	"timberio/vector": {Target: loongLocalRegistry + "vector"}, // keep tag; on-device native build (lcr rust:1.100) with --no-default-features --features target-base,tikv-jemallocator,vendored (mirrors upstream target-x86_64-unknown-linux-gnu deb feature set minus x86-only bits); openssl vendored + jemalloc 5.3 (loongarch since 5.3) + protoc; debian:sid base with ca-certificates/tzdata/libsasl2-2 (upstream debian image deps), ENTRYPOINT ["/usr/bin/vector"]
 	// --- databases / queues ---
 	"redis":     {Target: loongLCRRegistry + "library/redis", Fallback: "7.4.1", ByMajor: map[string]string{"5": "5.0.14", "6": "6.2.13", "7": "7.4.1", "8": "7.4.1"}},
+	"bitnamilegacy/redis": {Target: loongLCRRegistry + "library/redis", Fallback: "7.4.1", ByMajor: map[string]string{"5": "5.0.14", "6": "6.2.13", "7": "7.4.1", "8": "7.4.1"}}, // wave42 redis-cluster
 	"mysql":     {Target: loongLCRRegistry + "library/mysql", Fallback: "8.4.3", ByMajor: map[string]string{"5": "5.7.29-an23", "8": "8.4.3"}},
 	"mariadb":   {Target: loongLCRRegistry + "library/mariadb", Fallback: "13.1.1", ByMajor: map[string]string{"10": "10.5.18", "12": "13.1.1", "13": "13.1.1"}},
 	"postgres":  {Target: loongLCRRegistry + "library/postgres", Fallback: "15.7-sid", ByMajor: map[string]string{"13": "13.19-alpine3.21", "14": "13.19-alpine3.21", "15": "15.7-sid", "16": "15.7-sid", "17": "17-sid", "18": "17-sid"}},
+	"bitnamilegacy/postgresql": {Target: loongLCRRegistry + "library/postgres", Fallback: "15.7-sid", ByMajor: map[string]string{"13": "13.19-alpine3.21", "14": "13.19-alpine3.21", "15": "15.7-sid", "16": "15.7-sid", "17": "17-sid", "18": "17-sid"}}, // wave42 pg-cluster
 	"mongo":     {Target: loongLCRRegistry + "library/mongo", Fallback: "6.0.26"},
 	"memcached": {Target: loongLCRRegistry + "library/memcached", Fallback: "1.6.21-alpine"},
 	"rabbitmq":  {Target: loongLCRRegistry + "library/rabbitmq", Fallback: "4.1.2-management"},
@@ -214,8 +292,55 @@ var loong64BlockedRepos = map[string]bool{
 	"shuzhiyinhang/vexdb":                 true, // bank closed-source vector DB, no public loong64 channel
 	"dockurr/windows":                     true, // QEMU x86 guest needs KVM, no x86 virt on loong64
 	"zhaojun1998/zfile":                   true, // ZFile 5.x closed source, x86/arm binaries only
+	// wave40 (2026-11-15) VAR-batch triage
+	"mcr.microsoft.com/dotnet/aspnet": true, // Microsoft ships no loong64 .NET runtime
+	"eqalpha/keydb":                   true, // C++ Redis fork, no loong64 build; use lcr redis instead
+	// wave42 (2026-11-15): upstream dead - GitHub repo 404, Hub repo gone (daocloud: invalid repository)
+	"firezmc/dosgame-web-docker": true,
+	// wave43 (2026-11-15): Bun-compiled single binary (/app/convertx); Bun runtime has no loong64 port
+	"c4illin/convertx": true,
 	// wave 14 audit (2026-11-08): F verdict leftover rule removed from mapping table
 	"rustdesk/rustdesk-server-s6": true, // upstream rewrote git deps, 1.1.16 source build rotted (wave 10 F verdict; rule was dead - no image ever pushed)
+	// --- wave54 (2026-11-17) gap triage: audit14 no_rule sweep, 34 high-confidence unportables ---
+	// LLM/AI stack (python+GPU/torch deps, no loong64 wheels; 1Panel-official images ship amd64/arm64 only)
+	"rockchin/langbot":                 true, // LLM bot framework, python native deps
+	"langflowai/langflow":              true, // LangFlow, heavy python AI stack
+	"soulter/astrbot":                  true, // LLM bot, python native deps
+	"lss233/kirara-agent-framework":    true, // LLM agent framework
+	"agentscope/qwenpaw":               true, // LLM agent (alibaba qwen stack)
+	"1panel/hermes-agent":              true, // 1Panel AI agent, official image amd64/arm64 only
+	"1panel/clawswarm":                 true, // AI swarm orchestration, official image amd64/arm64 only
+	"1panel/ai-gateway":                true, // LLM gateway, official image amd64/arm64 only
+	"1panel/ai-portal":                 true, // AI portal, official image amd64/arm64 only
+	"1panel/deepseek-harness":          true, // DeepSeek eval harness
+	"1panel/maxkb":                     true, // AI knowledge base (pgvector+LLM), official image amd64/arm64 only
+	"dataease/sqlbot":                  true, // AI SQL bot (dataease), LLM deps
+	"ghcr.io/tencentcloud/octop":       true, // tencent cloud AI ops, closed stack
+	"1panel/openclaw":                  true, // AI agent runtime, official image amd64/arm64 only
+	// heavy C++ databases / search engines with no loong64 build and >8G RAM appetite
+	"clickhouse/clickhouse-server": true,   // C++ engine, no official loong64 build
+	"oceanbase/oceanbase-ce":       true,   // no loong64 community build; needs >>8G RAM
+	"starrocks/allin1-ubuntu":      true,   // no loong64 build; allin1 needs >>8G RAM
+	"manticoresearch/manticore":    true,   // C++ engine, no loong64 build
+	"typesense/typesense":          true,   // C++ engine, no loong64 build
+	// zabbix (C server + php agent stack, no loong64 images; xinchuang edition shares repo)
+	"zabbix/zabbix-proxy-mysql":  true,
+	"zabbix/zabbix-server-mysql": true,
+	// python mega-stacks / chromium-embedded (native wheels & chromium lack loong64)
+	"homeassistant/home-assistant":      true, // hundreds of native wheels, no loong64 wheel chain
+	"jupyter/scipy-notebook":            true, // scipy stack wheels unavailable for loong64
+	"archivebox/archivebox":             true, // core extraction needs chromium, no loong64
+	"dgtlmoon/changedetection.io":      true, // playwright chromium core, no loong64
+	"ghcr.io/browserless/chrome":        true, // is a chromium, no loong64 build
+	// heavyweight platforms (build chain or resource infeasible on this device)
+	"bitnamilegacy/discourse":            true, // ruby+sidekiq mega-stack, no loong64 images
+	"ghcr.io/huginn/huginn":              true, // ruby agent platform, no loong64 base
+	"jumpserver/jms_all":                 true, // all-in-one mega image, no loong64 build
+	"metersphere/metersphere-ce-allinone": true, // 10GB all-in-one, resource infeasible
+	"xiaozhu674/gameservermanager":       true, // game server management (steamcmd/wine x86)
+	"onlyoffice/documentserver":          true, // C++/node doc server, huge build chain, no loong64
+	"litespeedtech/openlitespeed":        true, // C++ server + lsphp, no loong64 build
+	"ghcr.io/yetone/magpie":              true, // desktop GUI tool, not NAS-shaped
 }
 
 // mapImagesForLoong64 rewrites service images in a parsed docker-compose map.
