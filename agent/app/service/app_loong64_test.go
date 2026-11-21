@@ -2,6 +2,8 @@ package service
 
 import (
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"runtime"
 	"testing"
@@ -10,6 +12,24 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
+
+// stubLocalRegistry serves the probe endpoint with the given status and
+// repoints loongLocalProbeBase at it; records the probed path. Returns a
+// restore func; deref lastPath after the calls to inspect the probed URL.
+func stubLocalRegistry(t *testing.T, status int) (func(), *string) {
+	t.Helper()
+	lastPath := ""
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lastPath = r.URL.Path
+		w.WriteHeader(status)
+	}))
+	old := loongLocalProbeBase
+	loongLocalProbeBase = srv.URL
+	return func() {
+		loongLocalProbeBase = old
+		srv.Close()
+	}, &lastPath
+}
 
 // the mapping layer logs via global.LOG; the test binary never runs the
 // agent boot sequence, so install a silent logger to avoid nil derefs
@@ -97,7 +117,8 @@ func TestMapLoong64Image(t *testing.T) {
 		// wave 10 (2026-11-08)
 		{"excalidraw/excalidraw:latest", "127.0.0.1:5000/loong/excalidraw:latest", true},
 		{"easytier/easytier:v2.7.0", "127.0.0.1:5000/loong/easytier:v2.7.0", true},
-		{"rustdesk/rustdesk-server-s6:1.1.16", "", false}, // wave14: F leftover, now blocked
+		// wave58: rustdesk 1.1.16 build landed, block removed -> maps with kept tag
+		{"rustdesk/rustdesk-server-s6:1.1.16", "127.0.0.1:5000/loong/rustdesk:1.1.16", true},
 		// wave 11 (2026-11-08)
 		{"imaegoo/twikoo:2.0.17", "127.0.0.1:5000/loong/twikoo:2.0.17", true},
 		{"lizheming/waline:1.43.6", "127.0.0.1:5000/loong/waline:1.43.6", true},
@@ -298,8 +319,6 @@ func TestIsBlockedLoong64Image(t *testing.T) {
 		"shuzhiyinhang/vexdb:3.0.0.28146",
 		"dockurr/windows:6.06",
 		"zhaojun1998/zfile:5.1.0",
-		// wave 14 audit (2026-11-08)
-		"rustdesk/rustdesk-server-s6:1.1.16",
 		// wave54 (2026-11-17) gap triage
 		"rockchin/langbot:v4.11.7",
 		"langflowai/langflow:1.13.2",
@@ -350,6 +369,8 @@ func TestMapImagesForLoong64WithBuildSection(t *testing.T) {
 	if runtime.GOARCH != "loong64" {
 		t.Skip("compose-level gate only fires on linux/loong64")
 	}
+	restore, _ := stubLocalRegistry(t, http.StatusOK)
+	defer restore()
 	raw := `
 services:
   openresty:
@@ -398,5 +419,125 @@ services:
 	}
 	if err.Error() != loong64UnsupportedMsg {
 		t.Fatalf("error = %q, want %q", err.Error(), loong64UnsupportedMsg)
+	}
+}
+
+// wave66b: local-registry miss must swap the ref to the public ACR mirror;
+// a confirmed local presence must keep the local ref; an unreachable
+// registry must also fall back (install must survive a stopped registry);
+// non-local (lcr) targets never fall back.
+func TestWithLoongACRFallback(t *testing.T) {
+	local := "127.0.0.1:5000/loong/openresty:1.31.8.1-2-2-noble"
+	acr := "crpi-a02ej0ppuvq7b0mw.cn-hangzhou.personal.cr.aliyuncs.com/1panel-loong64/openresty:1.31.8.1-2-2-noble"
+
+	restore, lastPath := stubLocalRegistry(t, http.StatusOK)
+	if got := withLoongACRFallback(local); got != local {
+		t.Errorf("local 200: got %q, want unchanged %q", got, local)
+	}
+	if *lastPath != "/v2/loong/openresty/manifests/1.31.8.1-2-2-noble" {
+		t.Errorf("probe path = %q, want /v2/loong/... (repo namespace must be kept)", *lastPath)
+	}
+	restore()
+
+	restore, _ = stubLocalRegistry(t, http.StatusNotFound)
+	if got := withLoongACRFallback(local); got != acr {
+		t.Errorf("local 404: got %q, want ACR %q", got, acr)
+	}
+	restore()
+
+	// registry unreachable: probe base points at a closed port
+	old := loongLocalProbeBase
+	loongLocalProbeBase = "http://127.0.0.1:1"
+	defer func() { loongLocalProbeBase = old }()
+	if got := withLoongACRFallback(local); got != acr {
+		t.Errorf("registry down: got %q, want ACR %q", got, acr)
+	}
+	if got := withLoongACRFallback("lcr.loongnix.cn/library/redis:7.4.1"); got != "lcr.loongnix.cn/library/redis:7.4.1" {
+		t.Errorf("lcr target must never fall back, got %q", got)
+	}
+}
+
+// compose-level integration: with the local registry answering 404, the
+// install compose must carry the ACR mirror ref so docker pulls from the
+// cloud instead of failing.
+func TestMapImagesForLoong64FallbackCompose(t *testing.T) {
+	if runtime.GOARCH != "loong64" {
+		t.Skip("compose-level gate only fires on linux/loong64")
+	}
+	restore, _ := stubLocalRegistry(t, http.StatusNotFound)
+	defer restore()
+	raw := `
+services:
+  openresty:
+    image: 1panel/openresty:1.31.8.1-2-2-noble
+`
+	composeMap := make(map[string]interface{})
+	if err := yaml.Unmarshal([]byte(raw), &composeMap); err != nil {
+		t.Fatal(err)
+	}
+	if err := mapImagesForLoong64(composeMap); err != nil {
+		t.Fatalf("mapping failed: %v", err)
+	}
+	services := composeMap["services"].(map[string]interface{})
+	svc := services["openresty"].(map[string]interface{})
+	want := "crpi-a02ej0ppuvq7b0mw.cn-hangzhou.personal.cr.aliyuncs.com/1panel-loong64/openresty:1.31.8.1-2-2-noble"
+	if got := svc["image"].(string); got != want {
+		t.Fatalf("image = %q, want %q", got, want)
+	}
+}
+
+// wave66b: offline-mirror store packages carry the local-registry ref
+// pre-baked in compose; with the local registry answering 404 the install
+// compose must swap that ref to the ACR mirror.
+func TestMapImagesForLoong64PrebakedFallbackCompose(t *testing.T) {
+	if runtime.GOARCH != "loong64" {
+		t.Skip("compose-level gate only fires on linux/loong64")
+	}
+	restore, _ := stubLocalRegistry(t, http.StatusNotFound)
+	defer restore()
+	raw := `
+services:
+  gatus:
+    image: 127.0.0.1:5000/loong/gatus:v5.38.0
+`
+	composeMap := make(map[string]interface{})
+	if err := yaml.Unmarshal([]byte(raw), &composeMap); err != nil {
+		t.Fatal(err)
+	}
+	if err := mapImagesForLoong64(composeMap); err != nil {
+		t.Fatalf("mapping failed: %v", err)
+	}
+	services := composeMap["services"].(map[string]interface{})
+	svc := services["gatus"].(map[string]interface{})
+	want := "crpi-a02ej0ppuvq7b0mw.cn-hangzhou.personal.cr.aliyuncs.com/1panel-loong64/gatus:v5.38.0"
+	if got := svc["image"].(string); got != want {
+		t.Fatalf("image = %q, want %q", got, want)
+	}
+}
+
+// with the local registry present (200) the pre-baked ref must stay local
+func TestMapImagesForLoong64PrebakedKeepLocalCompose(t *testing.T) {
+	if runtime.GOARCH != "loong64" {
+		t.Skip("compose-level gate only fires on linux/loong64")
+	}
+	restore, _ := stubLocalRegistry(t, http.StatusOK)
+	defer restore()
+	raw := `
+services:
+  gatus:
+    image: 127.0.0.1:5000/loong/gatus:v5.38.0
+`
+	composeMap := make(map[string]interface{})
+	if err := yaml.Unmarshal([]byte(raw), &composeMap); err != nil {
+		t.Fatal(err)
+	}
+	if err := mapImagesForLoong64(composeMap); err != nil {
+		t.Fatalf("mapping failed: %v", err)
+	}
+	services := composeMap["services"].(map[string]interface{})
+	svc := services["gatus"].(map[string]interface{})
+	want := "127.0.0.1:5000/loong/gatus:v5.38.0"
+	if got := svc["image"].(string); got != want {
+		t.Fatalf("image = %q, want %q", got, want)
 	}
 }

@@ -2,8 +2,11 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/1Panel-dev/1Panel/agent/global"
 )
@@ -15,6 +18,11 @@ import (
 //     images for loong64)
 //   - a local registry (127.0.0.1:5000/loong/...) for images we build on
 //     the device (e.g. OpenResty)
+//   - a public ACR mirror of that local registry as a secondary source:
+//     when the local registry does not have a mapped repo:tag (or is down),
+//     the ref is rewritten to the ACR mirror so installs keep working
+//     online (wave66b, 2026-11-21; namespace mirrors all self-built
+//     images, digests verified tag-by-tag)
 //
 // All rules are keyed by the source repository path (namespace/name or
 // bare docker hub library name). Tag selection: ByMajor[<major>] wins,
@@ -30,8 +38,14 @@ type loong64Rule struct {
 const (
 	loongLCRRegistry      = "lcr.loongnix.cn/"
 	loongLocalRegistry    = "127.0.0.1:5000/loong/"
+	loongRepoNamespace    = "loong/" // registry repo path under the host part
+	loongACRRegistry      = "crpi-a02ej0ppuvq7b0mw.cn-hangzhou.personal.cr.aliyuncs.com/1panel-loong64/"
 	loong64UnsupportedMsg = "该应用暂无 LoongArch64（龙芯）版本镜像，已列入移植矩阵不支持清单；可在「容器」页用自定义 compose 部署替代镜像"
 )
+
+// probe base for localRegistryHas; package var so tests can point it at
+// an httptest stub
+var loongLocalProbeBase = "http://127.0.0.1:5000"
 
 // exact repository-path rules (source repo -> rule)
 var loong64RepoRules = map[string]loong64Rule{
@@ -405,10 +419,23 @@ func mapImagesForLoong64(composeMap map[string]interface{}) error {
 		if isBlockedLoong64Image(image) {
 			return errors.New(loong64UnsupportedMsg)
 		}
+		if strings.HasPrefix(image, loongLocalRegistry) {
+			// offline-mirror store packages arrive with the local-registry
+			// ref pre-baked (compose ships 127.0.0.1:5000/loong/...); when
+			// that repo:tag is absent locally, swap to the public ACR mirror
+			// so the install still works online
+			mapped := withLoongACRFallback(image)
+			if mapped != image {
+				svc["image"] = mapped
+				global.LOG.Infof("[loong64] app service %q image %s -> %s (pre-baked ref, ACR fallback)", name, image, mapped)
+			}
+			continue
+		}
 		mapped, ok := mapLoong64Image(image)
 		if !ok {
 			continue
 		}
+		mapped = withLoongACRFallback(mapped)
 		svc["image"] = mapped
 		global.LOG.Infof("[loong64] app service %q image %s -> %s", name, image, mapped)
 	}
@@ -418,6 +445,53 @@ func mapImagesForLoong64(composeMap map[string]interface{}) error {
 func isBlockedLoong64Image(image string) bool {
 	repo, _ := splitImageRef(image)
 	return loong64BlockedRepos[repo]
+}
+
+// withLoongACRFallback swaps a local-registry image ref to the public ACR
+// mirror when the local registry does not have that repo:tag (or is
+// unreachable). Only self-built images (loongLocalRegistry targets) fall
+// back — lcr targets are publicly pullable and never need it.
+func withLoongACRFallback(image string) string {
+	if !strings.HasPrefix(image, loongLocalRegistry) {
+		return image
+	}
+	rest := strings.TrimPrefix(image, loongLocalRegistry) // "<name>:<tag>"
+	// registry repo path is loong/<name> under the host part
+	if localRegistryHas(loongRepoNamespace + rest) {
+		return image
+	}
+	alt := loongACRRegistry + rest
+	global.LOG.Infof("[loong64] local registry miss %s -> ACR fallback %s", image, alt)
+	return alt
+}
+
+// localRegistryHas probes the local registry for a repo:tag manifest via
+// HEAD. Only a confirmed 200 counts as present; anything else (404,
+// registry down, timeout) means "miss" so the install proceeds from the
+// ACR mirror instead of failing.
+func localRegistryHas(repoTag string) bool {
+	repo, tag := splitImageRef(repoTag)
+	if repo == "" || tag == "" {
+		return false
+	}
+	req, err := http.NewRequest(http.MethodHead,
+		fmt.Sprintf("%s/v2/%s/manifests/%s", loongLocalProbeBase, repo, tag), nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Accept", strings.Join([]string{
+		"application/vnd.docker.distribution.manifest.v2+json",
+		"application/vnd.docker.distribution.manifest.list.v2+json",
+		"application/vnd.oci.image.manifest.v1+json",
+		"application/vnd.oci.image.index.v1+json",
+	}, ", "))
+	client := &http.Client{Timeout: 3 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
 }
 
 func mapLoong64Image(image string) (string, bool) {
